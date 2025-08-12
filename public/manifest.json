@@ -2,7 +2,13 @@
   "manifest_version": 3,
   "name": "HooLogos",
   "version": "1.0.0",
-  "description": "Adds club logos to highlights thumbnails on hoofoot.com",
+  "description": "Adds club-logos to highlight-thumbnails on hoofoot.com",
+  "icons": {
+    "16": "assets/icons/icon16.png",
+    "32": "assets/icons/icon32.png",
+    "48": "assets/icons/icon48.png",
+    "128": "assets/icons/icon128.png"
+  },
   "content_scripts": [
     {
       "js": ["content.js"],

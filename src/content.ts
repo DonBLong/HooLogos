@@ -13,30 +13,46 @@ function replaceImages() {
     clubA = clubA.toLocaleLowerCase().replaceAll(" ", "-");
     clubB = clubB.split(" highlights").shift() ?? clubB;
     clubB = clubB.toLocaleLowerCase().replaceAll(" ", "-");
-    const clubAImgSrc = `${clubImagesDir}/${clubA}.svg`;
-    const clubBImgSrc = `${clubImagesDir}/${clubB}.svg`;
-    image.replaceWith(createVsImage(clubAImgSrc, clubBImgSrc));
+    const league =
+      image.parentElement?.parentElement
+        ?.getElementsByClassName("info")[0]
+        .getElementsByTagName("img")[0].alt || "";
+    image.replaceWith(
+      createVsWrapper(...getClubImageSrcs(clubImagesDir, league, clubA, clubB))
+    );
   });
 }
 
-function createVsImage(clubAImgSrc: string, clubBImgSrc: string) {
+function createVsWrapper(...clubAImageSrcs: string[]) {
   const wrapper = document.createElement("div");
   wrapper.style.display = "flex";
   wrapper.style.justifyContent = "space-evenly";
   wrapper.style.paddingBlock = "4%";
   wrapper.style.background = "gray";
-  wrapper.append(...createClubImages(clubAImgSrc, clubBImgSrc));
+  wrapper.append(...createClubImages(...clubAImageSrcs));
   return wrapper;
 }
 
-function createClubImages(...clubImgSrcs: string[]) {
-  return clubImgSrcs.map((src) => {
+function createClubImages(...clubImageSrcs: string[]) {
+  return clubImageSrcs.map((src) => {
     const img = document.createElement("img");
     img.src = src;
     img.style.width = "auto";
     img.style.maxWidth = "25%";
     img.style.maxHeight = "100px";
     return img;
+  });
+}
+
+function getClubImageSrcs(
+  clubImagesDir: string,
+  league: string,
+  ...clubs: string[]
+) {
+  return clubs.map((club) => {
+    if (club === "monaco" && league.match(/[lL][(ea)i]gue\s?1/))
+      club = "as-monaco";
+    return `${clubImagesDir}/${club}.svg`;
   });
 }
 

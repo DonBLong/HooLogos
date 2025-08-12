@@ -1,0 +1,21 @@
+{
+  "name": "@donblong/hoologos",
+  "description": "Adds club logos to highlights thumbnails on hoofoot.com",
+  "version": "1.0.0",
+  "main": "dist/content.js",
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build --watch",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.1.3",
+    "@types/node": "^24.2.1",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.0"
+  }
+}

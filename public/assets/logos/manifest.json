@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "HooLogos",
+  "version": "1.0.0",
+  "description": "HooFoot but with logos",
+  "content_scripts": [
+    {
+      "js": ["content.js"],
+      "matches": ["https://*.hoofoot.com/*"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["assets/*"],
+      "matches": ["https://*.hoofoot.com/*"]
+    }
+  ]
+}

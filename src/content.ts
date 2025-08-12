@@ -18,23 +18,23 @@ function replaceImages() {
         ?.getElementsByClassName("info")[0]
         .getElementsByTagName("img")[0].alt || "";
     image.replaceWith(
-      createVsWrapper(...getClubImageSrcs(clubImagesDir, league, clubA, clubB))
+      createVsWrapper(...getClubImgSrcs(clubImagesDir, league, clubA, clubB))
     );
   });
 }
 
-function createVsWrapper(...clubAImageSrcs: string[]) {
+function createVsWrapper(...clubImgSrcs: string[]) {
   const wrapper = document.createElement("div");
   wrapper.style.display = "flex";
   wrapper.style.justifyContent = "space-evenly";
   wrapper.style.paddingBlock = "4%";
   wrapper.style.background = "gray";
-  wrapper.append(...createClubImages(...clubAImageSrcs));
+  wrapper.append(...createClubImgs(...clubImgSrcs));
   return wrapper;
 }
 
-function createClubImages(...clubImageSrcs: string[]) {
-  return clubImageSrcs.map((src) => {
+function createClubImgs(...clubImgSrcs: string[]) {
+  return clubImgSrcs.map((src) => {
     const img = document.createElement("img");
     img.src = src;
     img.style.width = "auto";
@@ -44,7 +44,7 @@ function createClubImages(...clubImageSrcs: string[]) {
   });
 }
 
-function getClubImageSrcs(
+function getClubImgSrcs(
   clubImagesDir: string,
   league: string,
   ...clubs: string[]

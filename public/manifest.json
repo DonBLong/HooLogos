@@ -1,8 +1,9 @@
 {
+  "$schema": "https://json.schemastore.org/chrome-manifest.json",
   "manifest_version": 3,
   "name": "HooLogos",
   "version": "1.0.0",
-  "description": "Adds club-logos to highlight-thumbnails on hoofoot.com",
+  "description": "Adds team-logos to highlight-thumbnails on hoofoot.com",
   "icons": {
     "16": "assets/icons/icon16.png",
     "32": "assets/icons/icon32.png",
@@ -20,5 +21,14 @@
       "resources": ["assets/*"],
       "matches": ["https://*.hoofoot.com/*"]
     }
-  ]
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "host_permissions": ["https://*.hoofoot.com/*"],
+  "permissions": ["activeTab", "storage", "downloads"],
+  "action": {
+    "default_popup": "popup.html"
+  }
 }

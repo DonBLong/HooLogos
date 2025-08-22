@@ -1,59 +1,106 @@
-const clubImagesDir = chrome.runtime.getURL("assets/logos");
-const galleryElement = document.getElementById("gallery");
-if (galleryElement) {
-  const observer = new MutationObserver(replaceImages);
-  observer.observe(galleryElement, { childList: true, subtree: true });
-}
-function replaceImages() {
+import type { MapActionsMessage } from "./background";
+import type { LogosMap } from "./logosmapper";
+
+type StringReplacerMap = [searchValue: string, replaceValue: string][];
+
+const _LOGOS_DIRECTORY = chrome.runtime.getURL("assets/logos");
+const _GALLERY_ELEMENT = document.getElementById("gallery");
+const _TEAMS_SPLITTER = /\svs?\s/;
+const _VS_IMG_ALT_REPLACER_MAP: StringReplacerMap = [
+  [" highlights", ""],
+  [" ", "-"],
+];
+
+replaceImages();
+observeChanges(_GALLERY_ELEMENT);
+
+async function replaceImages() {
   const images = [...document.querySelectorAll("img")].filter((image) =>
-    image.alt.includes(" v ")
+    image.alt.match(_TEAMS_SPLITTER)
   );
+  const logoNames = images.flatMap((image) =>
+    formatLogoNames(
+      _VS_IMG_ALT_REPLACER_MAP,
+      ...image.alt.split(_TEAMS_SPLITTER)
+    )
+  );
+  const logosMap = await updateLogosMap(logoNames);
+
   images.forEach((image) => {
-    let [clubA, clubB] = image.alt.split(" v ");
-    clubA = clubA.toLocaleLowerCase().replaceAll(" ", "-");
-    clubB = clubB.split(" highlights").shift() ?? clubB;
-    clubB = clubB.toLocaleLowerCase().replaceAll(" ", "-");
-    const league =
-      image.parentElement?.parentElement
-        ?.getElementsByClassName("info")[0]
-        .getElementsByTagName("img")[0].alt || "";
+    const [logoA, logoB] = formatLogoNames(
+      _VS_IMG_ALT_REPLACER_MAP,
+      ...image.alt.split(_TEAMS_SPLITTER)
+    );
     image.replaceWith(
-      createVsWrapper(...getClubImgSrcs(clubImagesDir, league, clubA, clubB))
+      createVsWrapper(_LOGOS_DIRECTORY, logosMap, logoA, logoB)
     );
   });
 }
 
-function createVsWrapper(...clubImgSrcs: string[]) {
+async function updateLogosMap(logoNames: string[]) {
+  return await chrome.runtime.sendMessage<MapActionsMessage, LogosMap>({
+    action: "updateMap",
+    logoNames: [...logoNames],
+  });
+}
+
+function createVsWrapper(
+  logosDir: string,
+  logosMap: Record<string, string[]>,
+  ...[logoNameA, logoNameB]: string[]
+) {
   const wrapper = document.createElement("div");
   wrapper.style.display = "flex";
   wrapper.style.justifyContent = "space-evenly";
-  wrapper.style.paddingBlock = "4%";
+  wrapper.style.padding = "4%";
+  wrapper.style.paddingBottom = "16%";
   wrapper.style.background = "gray";
-  wrapper.append(...createClubImgs(...clubImgSrcs));
+  const logoA = createLogoLogo(logosDir, logosMap, logoNameA);
+  const logoB = createLogoLogo(logosDir, logosMap, logoNameB);
+  wrapper.append(logoA, logoB);
   return wrapper;
 }
 
-function createClubImgs(...clubImgSrcs: string[]) {
-  return clubImgSrcs.map((src) => {
-    const img = document.createElement("img");
-    img.src = src;
-    img.style.width = "auto";
-    img.style.maxWidth = "25%";
-    img.style.maxHeight = "100px";
-    return img;
-  });
-}
-
-function getClubImgSrcs(
-  clubImagesDir: string,
-  league: string,
-  ...clubs: string[]
+function createLogoLogo(
+  logosDir: string,
+  logosMap: LogosMap,
+  logoName: string
 ) {
-  return clubs.map((club) => {
-    if (club === "monaco" && league.match(/[lL][(ea)i]gue\s?1/))
-      club = "as-monaco";
-    return `${clubImagesDir}/${club}.svg`;
+  const img = document.createElement("img");
+  const src = `${logosDir}/${Object.keys(logosMap).find((logoFilename) =>
+    logosMap[logoFilename].includes(logoName)
+  )}`;
+  img.src = src;
+  img.style.width = "auto";
+  img.style.height = "auto";
+  img.style.maxWidth = "100%";
+  img.style.maxHeight = "100%";
+  img.loading = "lazy";
+  const imgWrapper = document.createElement("div");
+  imgWrapper.style.height = "100px";
+  imgWrapper.style.width = "100px";
+  imgWrapper.style.display = "flex";
+  imgWrapper.style.justifyContent = "center";
+  imgWrapper.style.alignItems = "center";
+  imgWrapper.append(img);
+  return imgWrapper;
+}
+
+function formatLogoNames(
+  stringsToReplace: StringReplacerMap,
+  ...logoNames: string[]
+) {
+  return logoNames.map((logoName) => {
+    stringsToReplace.forEach(
+      ([searchValue, replaceValue]) =>
+        (logoName = logoName.replaceAll(searchValue, replaceValue))
+    );
+    return logoName.toLocaleLowerCase();
   });
 }
 
-replaceImages();
+function observeChanges(element: HTMLElement | null) {
+  if (!element) return;
+  const observer = new MutationObserver(replaceImages);
+  observer.observe(element, { childList: true });
+}

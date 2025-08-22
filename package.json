@@ -1,15 +1,14 @@
 {
   "name": "@donblong/hoologos",
-  "description": "Adds club-logos to highlight-thumbnails on hoofoot.com",
+  "description": "Adds team-logos to highlight-thumbnails on hoofoot.com",
   "version": "1.0.0",
-  "main": "dist/content.js",
   "files": [
     "dist"
   ],
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build --watch",
+    "build": "node src/utils/mapgenerator.js && tsc && vite build -w",
     "preview": "vite preview"
   },
   "keywords": [

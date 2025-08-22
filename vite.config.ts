@@ -2,12 +2,21 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   build: {
-    rollupOptions: {
-      input: "src/content.ts",
-      output: {
-        entryFileNames: (chunkInfo) => `${chunkInfo.name}.js`,
+    lib: {
+      entry: [
+        "src/content.ts",
+        "src/background.ts",
+        "src/logosmapper.ts",
+        "popup.html",
+      ],
+      formats: ["es"],
+      fileName(_, entryName) {
+        return `${entryName}.js`;
       },
+      cssFileName: "assets/css/bootstrap.min",
     },
-    minify: false,
+  },
+  server: {
+    open: "popup.html",
   },
 });
